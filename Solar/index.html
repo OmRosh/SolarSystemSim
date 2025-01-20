@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .settings-panel {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            width: 300px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid white;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            z-index: 1000;
+        }
+        
+        .settings-panel.active {
+            display: block;
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .settings-item {
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .toggle-btn {
+            background: #444;
+            color: white;
+            border: 1px solid white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.on {
+            background: #00cc00;
+        }
+
+        .toggle-btn.off {
+            background: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div style="position: absolute; top: 10px; left: 10px; z-index: 1000;">
+        <button id="settingsBtn" style="background: none; border: none; cursor: pointer;">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="#ffffff">
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+            </svg>
+        </button>
+    </div>
+    <div id="settingsPanel" class="settings-panel">
+        <div class="settings-row">
+            <div class="settings-item">
+                <div>Lines</div>
+                <button class="toggle-btn on" onclick="
+                    this.textContent = this.textContent === 'ON' ? 'OFF' : 'ON'; 
+                    this.classList.toggle('on'); 
+                    this.classList.toggle('off');
+                    window.showGravityRings = this.textContent === 'ON';">ON</button>
+            </div>
+            <div class="settings-item">
+                <div>Numbers</div>
+                <button class="toggle-btn on" onclick="
+                    this.textContent = this.textContent === 'ON' ? 'OFF' : 'ON';
+                    this.classList.toggle('on');
+                    this.classList.toggle('off');
+                    window.showGravityNumbers = this.textContent === 'ON';">ON</button>
+            </div>
+        </div>
+        <div class="settings-row">
+            <div class="settings-item">
+                <div>Space Event</div>
+                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <button id="triggerEvent" class="toggle-btn">Trigger</button>
+                    <span id="eventTimer" style="color: #aaa; font-size: 14px;">60s</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <canvas id="gameCanvas"></canvas>
+        <div class="menu">
+            <h2>Celestial Bodies</h2>
+            <div class="controls">
+                <button id="playPause">Playing</button>
+                <button id="clear">Clear All</button>
+                <button id="explodeAll">Explode All</button>
+            </div>
+            <div class="celestial-objects">
+                <div class="object-group">
+                    <h3>Stars</h3>
+                    <div class="object-item" draggable="true" data-type="star">
+                        <img src="assets/yellow-star.png" alt="Yellow Star">
+                        <span>Yellow Star</span>
+                    </div>
+                    <div class="object-item" draggable="true" data-type="redGiant">
+                        <img src="assets/red-giant.png" alt="Red Giant">
+                        <span>Red Giant</span>
+                    </div>
+                    <div class="object-item" draggable="true" data-type="blueGiant">
+                        <img src="assets/blue-giant.png" alt="Blue Giant">
+                        <span>Blue Giant</span>
+                    </div>
+                </div>
+                <div class="object-group">
+                    <h3>Planets</h3>
+                    <div class="object-item" draggable="true" data-type="rocky">
+                        <img src="assets/rocky-planet.png" alt="Rocky Planet">
+                        <span>Rocky Planet</span>
+                    </div>
+                    <div class="object-item" draggable="true" data-type="gas">
+                        <img src="assets/gas-giant.png" alt="Gas Giant">
+                        <span>Gas Giant</span>
+                    </div>
+                    <div class="object-item" draggable="true" data-type="ice">
+                        <img src="assets/ice-planet.png" alt="Ice Planet">
+                        <span>Ice Planet</span>
+                    </div>
+                </div>
+                <div class="object-group">
+                    <h3>Special Objects</h3>
+                    <div class="object-item" draggable="true" data-type="blackHole">
+                        <img src="assets/black-hole.png" alt="Black Hole">
+                        <span>Black Hole</span>
+                    </div>
+                    <div class="object-item" draggable="true" data-type="neutron">
+                        <img src="assets/neutron-star.png" alt="Neutron Star">
+                        <span>Neutron Star</span>
+                    </div>
+                    <div class="object-item" draggable="true" data-type="quasar">
+                        <img src="assets/quasar.png" alt="Quasar">
+                        <span>Quasar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="particleEffect.js"></script>
+    <script src="celestialBody.js"></script>
+    <script src="physics.js"></script>
+    <script src="spaceEvent.js"></script>
+    <script src="main.js"></script>
+</body>
+</html> 
